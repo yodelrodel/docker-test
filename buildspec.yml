@@ -6,14 +6,19 @@ phases:
       - echo Logging in to Amazon ECR...
       - DOCKER_LOGIN=`aws ecr get-login --no-include-email --region us-east-2`
       - $DOCKER_LOGIN
+      - REPOSITORY_URI=266902911314.dkr.ecr.us-east-2.amazonaws.com/nginx-test 
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...          
-      - docker build -t nginx-test:latest .
-      - docker tag nginx-test:latest 266902911314.dkr.ecr.us-east-2.amazonaws.com/nginx-test:latest
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push 266902911314.dkr.ecr.us-east-2.amazonaws.com/nginx-test:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+artifacts:
+    files: imagedefinitions.json
